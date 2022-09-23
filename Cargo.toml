@@ -1,5 +1,8 @@
 cargo-features = ["edition2021"]
 
+[profile.release]
+lto = true
+
 [package]
 name = "rustshell"
 version = "0.1.0"

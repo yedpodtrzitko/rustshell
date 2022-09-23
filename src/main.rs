@@ -11,7 +11,7 @@ use colored::*;
 use chrono::{Local};
 
 fn main() {
-    let username = env::var("USER").unwrap();
+    let username = env::var("USER").unwrap_or(String::from("no username"));
     let cwd: PathBuf = env::current_dir().unwrap();
     let home_prefix: PathBuf = PathBuf::from(format!("/Users/{}", username));
 
@@ -21,10 +21,10 @@ fn main() {
         output = format!("~/{}", output);
     }
 
-    output = format!("{}@{} ", username, output).white().on_blue().to_string();
+    output = format!(" {}@{} ", username, output).white().on_blue().to_string();
 
     let now = Local::now();
-    let time = format!("{} ", now.format("%H:%M:%S")).to_string().black().on_white();
+    let time = format!(" {} ", now.format("%H:%M:%S")).to_string().black().on_white();
     output = format!("{}{}", time, output);
     //println!("{:02}:{:02}:{:02}", now.hour(), now.minute(), now.second());
 
@@ -55,8 +55,22 @@ fn main() {
         None => {}
     }
 
-    // exit code
-    println!("ret code: {}", env::var("?").unwrap_or(String::from("-")));
+    let args: Vec<String> = env::args().collect();
+    let ret_code: i8 = args.get(1).unwrap_or(&String::from("0")).parse().unwrap();
+    let ret_emoji = match ret_code {
+        0 => {
+            '\u{1F7E2}'
+        }
+        1..=127 => {
+            '\u{274C}'
+        }
+        _ => {
+            println!("no ret code");
+            '\u{274C}'
+        }
+    };
+
+    output = format!("{} {}\n $", output, ret_emoji);
 
     println!("{}", output)
 }
