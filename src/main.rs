@@ -7,36 +7,40 @@ use std::result::Result::{Err, Ok};
 use std::string::{String, ToString};
 use std::vec::Vec;
 use git_info;
-use colored::*;
 use chrono::{Local};
 
 fn main() {
-    let username = env::var("USER").unwrap_or(String::from("no username"));
-    let cwd: PathBuf = env::current_dir().unwrap();
-    let home_prefix: PathBuf = PathBuf::from(format!("/Users/{}", username));
+    let mut cwd = match env::current_dir() {
+        Ok(dir) => {
+            dir.display().to_string()
+        }
+        Err(e) => {
+            println!("{}", e);
+            String::from("unknown dir")
+        }
+    };
 
-    let mut output = cwd.display().to_string();
-    if cwd.starts_with(&home_prefix) {
-        output = cwd.strip_prefix(home_prefix).unwrap().display().to_string();
-        output = format!("~/{}", output);
+    let username = env::var("USER").unwrap_or(String::from("no username"));
+    let home_path: PathBuf = ["/Users/", username.as_str()].iter().collect();
+    let home_prefix = home_path.to_str().unwrap();
+    if cwd.starts_with(home_prefix) {
+        cwd = format!("~{}", cwd.strip_prefix(home_prefix).unwrap());
     }
 
-    output = format!(" {}@{} ", username, output).white().on_blue().to_string();
-
-    let now = Local::now();
-    let time = format!(" {} ", now.format("%H:%M:%S")).to_string().black().on_white();
-    output = format!("{}{}", time, output);
-    //println!("{:02}:{:02}:{:02}", now.hour(), now.minute(), now.second());
+    let current_time =  Local::now().format("%H:%M:%S");//.to_string();
+    let mut output = format!("{} {}@{} ", current_time, username, cwd);
 
     match env::var("VIRTUAL_ENV") {
         Ok(v) => {
             let venv_splat: Vec<&str> = v.split('/').collect();
             let venv_name = *(venv_splat.last().unwrap());
             let emoji_snake = '\u{1F40D}';
-            let venv_output = format!(" {} {} ", emoji_snake, venv_name).on_yellow().black();
+            let venv_output = format!(" {} {} ", emoji_snake, venv_name);//.on_yellow().black();
             output = format!("{}{}", output, venv_output)
         }
-        Err(_e) => {}
+        Err(e) => {
+            println!("virtualenv error {}", e);
+        }
     }
 
     let info = git_info::get();
@@ -49,7 +53,7 @@ fn main() {
             } else {
                 '\u{274C}'
             };*/
-            let output_git = format!(" {} {} ", emoji_git, branch).black().on_white().to_string();
+            let output_git = format!(" {} {} ", emoji_git, branch);//.black().on_white().to_string();
             output = format!("{}{}", output, output_git)
         }
         None => {}
@@ -71,6 +75,5 @@ fn main() {
     };
 
     output = format!("{} {}\n $", output, ret_emoji);
-
     println!("{}", output)
 }
