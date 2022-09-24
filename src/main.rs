@@ -8,6 +8,7 @@ use std::string::{String, ToString};
 use std::vec::Vec;
 use git_info;
 use chrono::{Local};
+use nu_ansi_term::Color::{ Cyan, Green, Yellow};
 
 fn main() {
     let mut cwd = match env::current_dir() {
@@ -22,13 +23,15 @@ fn main() {
 
     let username = env::var("USER").unwrap_or(String::from("no username"));
     let home_path: PathBuf = ["/Users/", username.as_str()].iter().collect();
-    let home_prefix = home_path.to_str().unwrap();
+    let home_prefix = home_path.to_str().unwrap_or("-invalid path-");
     if cwd.starts_with(home_prefix) {
-        cwd = format!("~{}", cwd.strip_prefix(home_prefix).unwrap());
+        cwd = format!("~{}", cwd.strip_prefix(home_prefix).unwrap_or("-invalid cwd-"));
     }
 
-    let current_time =  Local::now().format("%H:%M:%S");//.to_string();
-    let mut output = format!("{} {}@{} ", current_time, username, cwd);
+    let current_time = Local::now().format("%H:%M:%S");//.to_string();
+    let mut output = format!("{} {}@{} ", Green.paint(current_time.to_string()),
+                             username,
+                             Cyan.paint(cwd));
 
     match env::var("VIRTUAL_ENV") {
         Ok(v) => {
@@ -36,10 +39,10 @@ fn main() {
             let venv_name = *(venv_splat.last().unwrap());
             let emoji_snake = '\u{1F40D}';
             let venv_output = format!(" {} {} ", emoji_snake, venv_name);//.on_yellow().black();
-            output = format!("{}{}", output, venv_output)
+            output = format!("{} {}", output, Yellow.paint(venv_output));
         }
-        Err(e) => {
-            println!("virtualenv error {}", e);
+        Err(_) => {
+            //println!("virtualenv error {}", e);
         }
     }
 
@@ -60,20 +63,19 @@ fn main() {
     }
 
     let args: Vec<String> = env::args().collect();
-    let ret_code: i8 = args.get(1).unwrap_or(&String::from("0")).parse().unwrap();
+    let ret_code: i16 = args.get(1).unwrap_or(&String::from("0")).parse().unwrap();
     let ret_emoji = match ret_code {
         0 => {
             '\u{1F7E2}'
         }
-        1..=127 => {
+        1..=254 => {
             '\u{274C}'
         }
-        _ => {
-            println!("no ret code");
+        err => {
+            println!("ret code not match {}", err);
             '\u{274C}'
         }
     };
 
-    output = format!("{} {}\n $", output, ret_emoji);
-    println!("{}", output)
+    println!("{} {}\n$", output, ret_emoji);
 }

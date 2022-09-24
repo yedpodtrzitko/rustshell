@@ -12,3 +12,4 @@ resolver = "2"
 [dependencies]
 git_info = "0.1.2"
 chrono = "0.4"
+nu-ansi-term = "0.46"
