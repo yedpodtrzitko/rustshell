@@ -56,12 +56,12 @@ fn main() {
             let venv_splat: Vec<&str> = v.split('/').collect();
             let venv_name = *(venv_splat.last().unwrap());
             let emoji_snake = '\u{1F40D}';
-            let venv_output = format!(" {} {} ", emoji_snake, venv_name);
-            prompt_items.push(Color::Yellow.bold().paint(venv_output).to_string());
+            //let venv_output = format!(" {} {} ", emoji_snake, venv_name);
+            prompt_items.push(String::from(""));
+            prompt_items.push(Color::Yellow.paint(emoji_snake.to_string()).to_string());
+            prompt_items.push(Color::Yellow.bold().paint(venv_name).to_string());
         }
-        Err(_) => {
-            println!("virtualenv error {}", e);
-        }
+        Err(_) => {}
     }
 
     let info = git_info::get();
@@ -74,9 +74,11 @@ fn main() {
             } else {
                 '\u{274C}'
             };*/
-            let output_git = format!(" {} {} ", emoji_git, branch);
-            let output_git_color = Color::White.bold().paint(output_git).to_string();
-            prompt_items.push(output_git_color);
+            //let output_git = format!(" {} {} ", emoji_git, branch);
+            //let output_git_color = Color::White.bold().paint(output_git).to_string();
+            prompt_items.push(String::from(""));
+            prompt_items.push(emoji_git.to_string());
+            prompt_items.push(branch);
         }
         None => {}
     }
