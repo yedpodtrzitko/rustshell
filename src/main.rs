@@ -78,7 +78,7 @@ fn main() {
             //let output_git_color = Color::White.bold().paint(output_git).to_string();
             prompt_items.push(String::from(""));
             prompt_items.push(emoji_git.to_string());
-            prompt_items.push(branch);
+            prompt_items.push(Color::White.bold().paint(branch).to_string());
         }
         None => {}
     }
