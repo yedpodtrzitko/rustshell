@@ -1,5 +1,12 @@
 [profile.release]
 lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
 
 [package]
 name = "rustshell"
